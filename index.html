@@ -402,6 +402,7 @@
       <input type="text" id="itemInput" placeholder="Adicionar item..." autofocus>
       <select class="add-category-select" id="addCategory">
         <option value="">Categoria</option>
+        <option value="Especiais no Menu" selected>⭐ Especiais no Menu</option>
         <option value="Abrigo e Conforto">Abrigo e Conforto</option>
         <option value="Zona Comum">Zona Comum</option>
         <option value="Energia">Energia</option>
@@ -600,7 +601,7 @@
         return;
       }
 
-      const order = ['Abrigo e Conforto','Zona Comum','Energia','Cozinha e Alimentação','Limpeza','Segurança e Saúde','Extras Úteis','Para Acrescentar',''];
+      const order = ['Especiais no Menu','Abrigo e Conforto','Zona Comum','Energia','Cozinha e Alimentação','Limpeza','Segurança e Saúde','Extras Úteis','Para Acrescentar',''];
       const groups = {};
       order.forEach(c => groups[c] = []);
       items.forEach(it => { const c = it.cat || ''; if (!groups[c]) groups[c] = []; groups[c].push(it); });
@@ -609,7 +610,7 @@
       order.forEach(cat => {
         const g = groups[cat] || [];
         if (!g.length) return;
-        if (cat) html += `<div class="category-header">${esc(cat)}</div>`;
+        if (cat) html += `<div class="category-header">${cat === 'Especiais no Menu' ? '⭐ ' + esc(cat) : esc(cat)}</div>`;
         g.forEach(it => {
           html += `<div class="table-row" data-id="${it.id}">
             <span class="col-item item-label">${esc(it.name)}</span>
@@ -659,7 +660,8 @@
       const inp = document.getElementById('itemInput');
       const name = inp.value.trim();
       if (!name) return;
-      const cat = document.getElementById('addCategory').value;
+      let cat = document.getElementById('addCategory').value;
+      if (!cat) cat = 'Especiais no Menu';
       items.push({ id: nextId++, name, cat, ticks: { andre: false, pedro: false, fifi: false, davids: false }, note: '' });
       inp.value = '';
       inp.focus();
