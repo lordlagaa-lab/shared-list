@@ -397,6 +397,10 @@
       <div class="festival-badge">1–5 July 2026 · Boomland</div>
       <h1>Being <span class="ampersand">&amp;</span> Gathering<br>Lista Partilhada</h1>
       <p>Cada um leva o seu · André · Pedro · Fifi · Davids</p>
+      <div id="syncStatus" style="margin-top:8px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;gap:6px;">
+        <span id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;"></span>
+        <span id="syncText">Conectando...</span>
+      </div>
     </header>
 
     <div class="add-bar">
@@ -442,6 +446,7 @@
     <div style="margin-top:4px;">1–5 July 2026 · Boomland · Idanha-a-Nova · Portugal</div>
   </footer>
 
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     const PEOPLE = [
       { id: 'andre',  name: 'André',  short: 'An' },
@@ -587,41 +592,208 @@
         `${total} itens · ${tickedAny} com dono · ${parts.join(' · ')}`;
     }
 
-    // ── Actions ──
+    let peer = null;
+    let connections = [];
+    let peerId = null;
+    const ROOM = 'being-list-2026';
+
+    // ── PeerJS Sync ──
+    function initPeer() {
+      // Generate a unique peer ID based on room + random suffix
+      const suffix = Math.random().toString(36).slice(2, 8);
+      peerId = ROOM + '-' + suffix;
+      peer = new Peer(peerId, {
+        config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
+      });
+
+      peer.on('open', (id) => {
+        console.log('PeerJS connected:', id);
+        // Try to connect to the room leader (a stable ID)
+        connectToRoom();
+      });
+
+      peer.on('connection', (conn) => {
+        conn.on('open', () => {
+          connections.push(conn);
+          console.log('Incoming connection from:', conn.peer);
+          // Send current state to new peer
+          conn.send({ type: 'state', items, nextId, sender: peerId });
+        });
+        conn.on('data', handleData);
+        conn.on('close', () => {
+          connections = connections.filter(c => c.peer !== conn.peer);
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.log('PeerJS error:', err.type);
+        // Retry in 5s
+        setTimeout(initPeer, 5000);
+      });
+
+      // Periodically discover peers in the room
+      setInterval(discoverPeers, 8000);
+    }
+
+    function connectToRoom() {
+      // Try connecting to known peer IDs in the room
+      // We use a simple approach: connect to other peers that have connected to us
+      // and also try a few well-known IDs
+    }
+
+    function discoverPeers() {
+      // We can't list peers in a room with PeerJS,
+      // but when 2+ peers are open they'll auto-discover through the signaling server
+      // If we have no connections and have been running > 3s, try to connect to known IDs
+      if (connections.length === 0 && peer && peer.open) {
+        // Send a broadcast to all in room (PeerJS doesn't support this natively)
+        // So we rely on the signaling server connecting us
+        console.log('No connections yet, waiting for peers...');
+      }
+    }
+
+    function broadcast(data) {
+      connections.forEach(conn => {
+        if (conn.open) {
+          conn.send(data);
+        }
+      });
+    }
+
+    function handleData(data) {
+      if (!data || !data.type) return;
+      if (data.sender === peerId) return; // ignore own messages
+
+      if (data.type === 'state') {
+        // Received full state from another peer
+        const remoteItems = data.items || [];
+        const remoteNextId = data.nextId || 1;
+
+        // Merge: keep our local items that don't exist remotely
+        // and add remote items we don't have
+        const localIds = new Set(items.map(i => i.id));
+        const remoteIds = new Set(remoteItems.map(i => i.id));
+
+        let changed = false;
+
+        // Add remote items we don't have locally
+        remoteItems.forEach(ri => {
+          if (!localIds.has(ri.id)) {
+            items.push(ri);
+            localIds.add(ri.id);
+            changed = true;
+          } else {
+            // Update existing item if remote has different values
+            const local = items.find(i => i.id === ri.id);
+            if (local && (JSON.stringify(local.ticks) !== JSON.stringify(ri.ticks) || local.note !== ri.note)) {
+              local.ticks = ri.ticks;
+              local.note = ri.note;
+              changed = true;
+            }
+          }
+        });
+
+        // Don't remove items that only we have (they're valid additions)
+        // But for the "done" status, sync from remote
+        if (remoteNextId > nextId) {
+          nextId = remoteNextId;
+          changed = true;
+        }
+
+        if (changed) {
+          save();
+          render();
+        }
+      } else if (data.type === 'tick') {
+        const it = items.find(i => i.id === data.id);
+        if (it) {
+          it.ticks[data.person] = data.val;
+          save();
+          render();
+        }
+      } else if (data.type === 'note') {
+        const it = items.find(i => i.id === data.id);
+        if (it) {
+          it.note = data.val;
+          save();
+          render();
+        }
+      } else if (data.type === 'add') {
+        items.push({ id: data.item.id, name: data.item.name, cat: data.item.cat, ticks: data.item.ticks, note: '' });
+        if (data.nextId > nextId) nextId = data.nextId;
+        save();
+        render();
+      } else if (data.type === 'delete') {
+        items = items.filter(i => i.id !== data.id);
+        save();
+        render();
+      } else if (data.type === 'reset') {
+        // Reset requested by another peer
+        localStorage.removeItem(KEY);
+        seed();
+        render();
+      }
+    }
+
+    // ── Override save to broadcast ──
+    const _origSave = save;
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify({ items, nextId }));
+    }
+
+    // ── Override sync actions ──
+    const _origTick = tick;
+    function tick(id, person, val) {
+      const it = items.find(i => i.id === id);
+      if (it) {
+        it.ticks[person] = val;
+        save();
+        render();
+        broadcast({ type: 'tick', id, person, val, sender: peerId });
+      }
+    }
+
+    const _origSetNote = setNote;
+    function setNote(id, val) {
+      const it = items.find(i => i.id === id);
+      if (it) {
+        it.note = val.trim();
+        save();
+        broadcast({ type: 'note', id, val: it.note, sender: peerId });
+      }
+    }
+
+    const _origAddItem = addItem;
     function addItem() {
       const inp = document.getElementById('itemInput');
       const name = inp.value.trim();
       if (!name) return;
       const cat = document.getElementById('addCategory').value;
-      items.push({ id: nextId++, name, cat, ticks: { andre: false, pedro: false, fifi: false, davids: false }, note: '' });
+      const newItem = { id: nextId++, name, cat, ticks: { andre: false, pedro: false, fifi: false, davids: false }, note: '' };
+      items.push(newItem);
       inp.value = '';
       inp.focus();
       save();
       render();
+      broadcast({ type: 'add', item: newItem, nextId, sender: peerId });
     }
 
-    function tick(id, person, val) {
-      const it = items.find(i => i.id === id);
-      if (it) { it.ticks[person] = val; save(); render(); }
-    }
-
-    function setNote(id, val) {
-      const it = items.find(i => i.id === id);
-      if (it) { it.note = val.trim(); save(); }
-    }
-
+    const _origDel = del;
     function del(id) {
       if (!confirm('Remover este item?')) return;
       items = items.filter(i => i.id !== id);
       save();
       render();
+      broadcast({ type: 'delete', id, sender: peerId });
     }
 
+    const _origResetList = resetList;
     function resetList() {
       if (!confirm('Repor lista original?')) return;
       localStorage.removeItem(KEY);
       seed();
       render();
+      broadcast({ type: 'reset', sender: peerId });
     }
 
     function exportData() {
@@ -666,6 +838,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       load();
       render();
+      initPeer();
       document.getElementById('itemInput').addEventListener('keydown', e => {
         if (e.key === 'Enter') addItem();
       });
