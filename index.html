@@ -507,17 +507,37 @@
     let items = [];
     let nextId = 1;
     const KEY = 'being-list-data-v2';
+    let saving = false;
+    let pollTimer = null;
 
-    function load() {
+    // ── API Sync ──
+    async function loadFromAPI() {
       try {
-        const raw = localStorage.getItem(KEY);
-        if (raw) {
-          const d = JSON.parse(raw);
-          items = d.items || [];
-          nextId = d.nextId || 1;
-          if (!items.length) seed();
-        } else { seed(); }
-      } catch(e) { seed(); }
+        const resp = await fetch(`${API}/api/items`);
+        const data = await resp.json();
+        if (data.items && data.items.length > 0) {
+          items = data.items;
+          nextId = data.nextId || (items.length + 1);
+          localStorage.setItem(KEY, JSON.stringify({ items, nextId }));
+          setSyncStatus('synced', 'Sincronizado ✓');
+        } else {
+          seed();
+          pushToAPI();
+        }
+      } catch(e) {
+        setSyncStatus('error', 'Erro de ligação');
+        // Try localStorage fallback
+        try {
+          const raw = localStorage.getItem(KEY);
+          if (raw) {
+            const d = JSON.parse(raw);
+            items = d.items || [];
+            nextId = d.nextId || 1;
+            if (!items.length) seed();
+          } else { seed(); }
+        } catch(e2) { seed(); }
+      }
+      render();
     }
 
     function seed() {
@@ -529,23 +549,62 @@
         note: '',
       }));
       nextId = items.length + 1;
-      save();
     }
 
-    function save() { localStorage.setItem(KEY, JSON.stringify({ items, nextId })); }
+    async function pushToAPI() {
+      if (saving) return;
+      saving = true;
+      try {
+        await fetch(`${API}/api/items`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items, nextId })
+        });
+        setSyncStatus('synced', 'Sincronizado ✓');
+      } catch(e) {
+        setSyncStatus('error', 'Erro ao guardar');
+      }
+      saving = false;
+    }
+
+    function startPolling() {
+      pollTimer = setInterval(async () => {
+        try {
+          const resp = await fetch(`${API}/api/items`);
+          const data = await resp.json();
+          if (!data.items) return;
+          const remote = JSON.stringify(data.items.map(i => [i.id, i.ticks, i.note]));
+          const local = JSON.stringify(items.map(i => [i.id, i.ticks, i.note]));
+          if (remote !== local) {
+            items = data.items;
+            nextId = data.nextId || (items.length + 1);
+            render();
+            setSyncStatus('synced', 'Sincronizado ✓');
+          }
+        } catch(e) {
+          // silent
+        }
+      }, 3000);
+    }
+
+    function setSyncStatus(state, msg) {
+      const dot = document.getElementById('syncDot');
+      const txt = document.getElementById('syncText');
+      if (!dot || !txt) return;
+      dot.style.background = state === 'synced' ? '#2a514c' : state === 'error' ? '#cc2222' : '#888';
+      txt.textContent = msg;
+    }
 
     function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
 
     function render() {
       const con = document.getElementById('itemContainer');
-
       if (!items.length) {
         con.innerHTML = '<div class="empty-state"><h3>🌿 Lista vazia</h3><p>Adiciona itens acima</p></div>';
         document.getElementById('stats').textContent = '';
         return;
       }
 
-      // Group by category
       const order = ['Abrigo e Conforto','Zona Comum','Energia','Cozinha e Alimentação','Limpeza','Segurança e Saúde','Extras Úteis','Para Acrescentar',''];
       const groups = {};
       order.forEach(c => groups[c] = []);
@@ -577,7 +636,6 @@
       });
       con.innerHTML = html;
 
-      // Stats
       const total = items.length;
       const tickCounts = {};
       let tickedAny = 0;
@@ -592,208 +650,41 @@
         `${total} itens · ${tickedAny} com dono · ${parts.join(' · ')}`;
     }
 
-    let peer = null;
-    let connections = [];
-    let peerId = null;
-    const ROOM = 'being-list-2026';
-
-    // ── PeerJS Sync ──
-    function initPeer() {
-      // Generate a unique peer ID based on room + random suffix
-      const suffix = Math.random().toString(36).slice(2, 8);
-      peerId = ROOM + '-' + suffix;
-      peer = new Peer(peerId, {
-        config: { 'iceServers': [{ urls: 'stun:stun.l.google.com:19302' }] }
-      });
-
-      peer.on('open', (id) => {
-        console.log('PeerJS connected:', id);
-        // Try to connect to the room leader (a stable ID)
-        connectToRoom();
-      });
-
-      peer.on('connection', (conn) => {
-        conn.on('open', () => {
-          connections.push(conn);
-          console.log('Incoming connection from:', conn.peer);
-          // Send current state to new peer
-          conn.send({ type: 'state', items, nextId, sender: peerId });
-        });
-        conn.on('data', handleData);
-        conn.on('close', () => {
-          connections = connections.filter(c => c.peer !== conn.peer);
-        });
-      });
-
-      peer.on('error', (err) => {
-        console.log('PeerJS error:', err.type);
-        // Retry in 5s
-        setTimeout(initPeer, 5000);
-      });
-
-      // Periodically discover peers in the room
-      setInterval(discoverPeers, 8000);
-    }
-
-    function connectToRoom() {
-      // Try connecting to known peer IDs in the room
-      // We use a simple approach: connect to other peers that have connected to us
-      // and also try a few well-known IDs
-    }
-
-    function discoverPeers() {
-      // We can't list peers in a room with PeerJS,
-      // but when 2+ peers are open they'll auto-discover through the signaling server
-      // If we have no connections and have been running > 3s, try to connect to known IDs
-      if (connections.length === 0 && peer && peer.open) {
-        // Send a broadcast to all in room (PeerJS doesn't support this natively)
-        // So we rely on the signaling server connecting us
-        console.log('No connections yet, waiting for peers...');
-      }
-    }
-
-    function broadcast(data) {
-      connections.forEach(conn => {
-        if (conn.open) {
-          conn.send(data);
-        }
-      });
-    }
-
-    function handleData(data) {
-      if (!data || !data.type) return;
-      if (data.sender === peerId) return; // ignore own messages
-
-      if (data.type === 'state') {
-        // Received full state from another peer
-        const remoteItems = data.items || [];
-        const remoteNextId = data.nextId || 1;
-
-        // Merge: keep our local items that don't exist remotely
-        // and add remote items we don't have
-        const localIds = new Set(items.map(i => i.id));
-        const remoteIds = new Set(remoteItems.map(i => i.id));
-
-        let changed = false;
-
-        // Add remote items we don't have locally
-        remoteItems.forEach(ri => {
-          if (!localIds.has(ri.id)) {
-            items.push(ri);
-            localIds.add(ri.id);
-            changed = true;
-          } else {
-            // Update existing item if remote has different values
-            const local = items.find(i => i.id === ri.id);
-            if (local && (JSON.stringify(local.ticks) !== JSON.stringify(ri.ticks) || local.note !== ri.note)) {
-              local.ticks = ri.ticks;
-              local.note = ri.note;
-              changed = true;
-            }
-          }
-        });
-
-        // Don't remove items that only we have (they're valid additions)
-        // But for the "done" status, sync from remote
-        if (remoteNextId > nextId) {
-          nextId = remoteNextId;
-          changed = true;
-        }
-
-        if (changed) {
-          save();
-          render();
-        }
-      } else if (data.type === 'tick') {
-        const it = items.find(i => i.id === data.id);
-        if (it) {
-          it.ticks[data.person] = data.val;
-          save();
-          render();
-        }
-      } else if (data.type === 'note') {
-        const it = items.find(i => i.id === data.id);
-        if (it) {
-          it.note = data.val;
-          save();
-          render();
-        }
-      } else if (data.type === 'add') {
-        items.push({ id: data.item.id, name: data.item.name, cat: data.item.cat, ticks: data.item.ticks, note: '' });
-        if (data.nextId > nextId) nextId = data.nextId;
-        save();
-        render();
-      } else if (data.type === 'delete') {
-        items = items.filter(i => i.id !== data.id);
-        save();
-        render();
-      } else if (data.type === 'reset') {
-        // Reset requested by another peer
-        localStorage.removeItem(KEY);
-        seed();
-        render();
-      }
-    }
-
-    // ── Override save to broadcast ──
-    const _origSave = save;
-    function save() {
-      localStorage.setItem(KEY, JSON.stringify({ items, nextId }));
-    }
-
-    // ── Override sync actions ──
-    const _origTick = tick;
-    function tick(id, person, val) {
+    // ── Actions ──
+    async function tick(id, person, val) {
       const it = items.find(i => i.id === id);
-      if (it) {
-        it.ticks[person] = val;
-        save();
-        render();
-        broadcast({ type: 'tick', id, person, val, sender: peerId });
-      }
+      if (it) { it.ticks[person] = val; render(); await pushToAPI(); }
     }
 
-    const _origSetNote = setNote;
-    function setNote(id, val) {
+    async function setNote(id, val) {
       const it = items.find(i => i.id === id);
-      if (it) {
-        it.note = val.trim();
-        save();
-        broadcast({ type: 'note', id, val: it.note, sender: peerId });
-      }
+      if (it) { it.note = val.trim(); await pushToAPI(); }
     }
 
-    const _origAddItem = addItem;
-    function addItem() {
+    async function addItem() {
       const inp = document.getElementById('itemInput');
       const name = inp.value.trim();
       if (!name) return;
       const cat = document.getElementById('addCategory').value;
-      const newItem = { id: nextId++, name, cat, ticks: { andre: false, pedro: false, fifi: false, davids: false }, note: '' };
-      items.push(newItem);
+      items.push({ id: nextId++, name, cat, ticks: { andre: false, pedro: false, fifi: false, davids: false }, note: '' });
       inp.value = '';
       inp.focus();
-      save();
       render();
-      broadcast({ type: 'add', item: newItem, nextId, sender: peerId });
+      await pushToAPI();
     }
 
-    const _origDel = del;
-    function del(id) {
+    async function del(id) {
       if (!confirm('Remover este item?')) return;
       items = items.filter(i => i.id !== id);
-      save();
       render();
-      broadcast({ type: 'delete', id, sender: peerId });
+      await pushToAPI();
     }
 
-    const _origResetList = resetList;
-    function resetList() {
+    async function resetList() {
       if (!confirm('Repor lista original?')) return;
-      localStorage.removeItem(KEY);
       seed();
       render();
-      broadcast({ type: 'reset', sender: peerId });
+      await pushToAPI();
     }
 
     function exportData() {
@@ -836,9 +727,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      load();
-      render();
-      initPeer();
+      loadFromAPI();
+      startPolling();
       document.getElementById('itemInput').addEventListener('keydown', e => {
         if (e.key === 'Enter') addItem();
       });
