@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Group List — Shared Tasks</title>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #24243a;
+      --border: #2e2e48;
+      --text: #e8e8f0;
+      --text2: #9999b0;
+      --accent: #7c6ef0;
+      --green: #4ade80;
+      --red: #f87171;
+      --orange: #fb923c;
+      --blue: #60a5fa;
+      --purple: #a78bfa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header p {
+      color: var(--text2);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .people-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .person-chip {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .person-chip.active {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .person-chip .count {
+      font-size: 11px;
+      background: var(--surface2);
+      padding: 2px 8px;
+      border-radius: 10px;
+      color: var(--text2);
+    }
+    .dot-andre { color: #4ade80; }
+    .dot-pedro { color: #60a5fa; }
+    .dot-fifi { color: #f87171; }
+    .dot-davids { color: #fb923c; }
+    .dot-unassigned { color: var(--text2); }
+
+    .add-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .add-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .add-bar input:focus {
+      border-color: var(--accent);
+    }
+    .add-bar input::placeholder {
+      color: var(--text2);
+    }
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .filter-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .filter-btn .f-count {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-left: 4px;
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .item:hover {
+      border-color: #3a3a5a;
+    }
+    .item.done {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+    .item-checkbox {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .item-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-name {
+      font-size: 15px;
+      font-weight: 500;
+      word-break: break-word;
+    }
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .assign-select {
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+    }
+    .assign-select:focus {
+      border-color: var(--accent);
+    }
+    .item-comment {
+      flex: 1;
+      min-width: 120px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text2);
+      font-size: 12px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .item-comment:focus {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    .item-comment::placeholder {
+      color: #555;
+    }
+    .item-delete {
+      background: none;
+      border: none;
+      color: var(--text2);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .item-delete:hover {
+      color: var(--red);
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text2);
+    }
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .stats {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text2);
+    }
+
+    @media (max-width: 600px) {
+      .item-meta {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .item-comment { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📋 Shared List</h1>
+      <p>Add items, assign to someone, add a comment</p>
+    </header>
+
+    <div class="people-bar" id="peopleBar">
+      <span class="person-chip active" data-filter="all">
+        All <span class="count" id="countAll">0</span>
+      </span>
+      <span class="person-chip" data-filter="andre">
+        <span class="dot-andre">●</span> André <span class="count" id="countAndre">0</span>
+      </span>
+      <span class="person-chip" data-filter="pedro">
+        <span class="dot-pedro">●</span> Pedro <span class="count" id="countPedro">0</span>
+      </span>
+      <span class="person-chip" data-filter="fifi">
+        <span class="dot-fifi">●</span> Fifi <span class="count" id="countFifi">0</span>
+      </span>
+      <span class="person-chip" data-filter="davids">
+        <span class="dot-davids">●</span> Davids <span class="count" id="countDavids">0</span>
+      </span>
+      <span class="person-chip" data-filter="unassigned">
+        <span class="dot-unassigned">○</span> Unassigned <span class="count" id="countUnassigned">0</span>
+      </span>
+    </div>
+
+    <div class="add-bar">
+      <input type="text" id="itemInput" placeholder="Add an item..." autofocus>
+      <button class="btn btn-primary" onclick="addItem()">+ Add</button>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-status="all">All <span class="f-count" id="fAll">0</span></button>
+      <button class="filter-btn" data-status="active">Active <span class="f-count" id="fActive">0</span></button>
+      <button class="filter-btn" data-status="done">Done <span class="f-count" id="fDone">0</span></button>
+    </div>
+
+    <div class="item-list" id="itemList">
+      <div class="empty-state" id="emptyState">
+        <h3>✨ No items yet</h3>
+        <p>Add something above to get started</p>
+      </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-ghost" onclick="clearDone()">🗑 Clear Done</button>
+      <button class="btn btn-ghost" onclick="exportData()">📤 Export</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📥 Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <script>
+    // ── Data ────────────────────────────────────────────────────────────
+    const PEOPLE = [
+      { id: 'andre',  name: 'André',  emoji: '🟢' },
+      { id: 'pedro',  name: 'Pedro',  emoji: '🔵' },
+      { id: 'fifi',   name: 'Fifi',   emoji: '🔴' },
+      { id: 'davids', name: 'Davids', emoji: '🟠' },
+    ];
+
+    let items = [];
+    let filterPerson = 'all';
+    let filterStatus = 'all';
+    let nextId = 1;
+
+    // ── Persistence ──────────────────────────────────────────────────────
+    const STORAGE_KEY = 'shared-list-data';
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          items = data.items || [];
+          nextId = data.nextId || 1;
+        }
+      } catch (e) {
+        items = [];
+        nextId = 1;
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, nextId }));
+    }
+
+    // ── Render ──────────────────────────────────────────────────────────
+    function getFilteredItems() {
+      return items.filter(item => {
+        // Person filter
+        if (filterPerson !== 'all' && filterPerson === 'unassigned') {
+          if (item.assignee) return false;
+        } else if (filterPerson !== 'all') {
+          if (item.assignee !== filterPerson) return false;
+        }
+        // Status filter
+        if (filterStatus === 'active' && item.done) return false;
+        if (filterStatus === 'done' && !item.done) return false;
+        return true;
+      });
+    }
+
+    function render() {
+      const list = document.getElementById('itemList');
+      const filtered = getFilteredItems();
+
+      // Update person counts (based on ALL items, not filtered)
+      const allCount = items.length;
+      const countByPerson = {};
+      let unassignedCount = 0;
+      items.forEach(item => {
+        if (item.assignee) {
+          countByPerson[item.assignee] = (countByPerson[item.assignee] || 0) + 1;
+        } else {
+          unassignedCount++;
+        }
+      });
+      document.getElementById('countAll').textContent = allCount;
+      PEOPLE.forEach(p => {
+        const el = document.getElementById('count' + p.id.charAt(0).toUpperCase() + p.id.slice(1));
+        if (el) el.textContent = countByPerson[p.id] || 0;
+      });
+      document.getElementById('countUnassigned').textContent = unassignedCount;
+
+      // Status counts
+      const activeCount = items.filter(i => !i.done).length;
+      const doneCount = items.filter(i => i.done).length;
+      document.getElementById('fAll').textContent = allCount;
+      document.getElementById('fActive').textContent = activeCount;
+      document.getElementById('fDone').textContent = doneCount;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <h3>${allCount === 0 ? '✨ No items yet' : '📭 Nothing matches'}</h3>
+            <p>${allCount === 0 ? 'Add something above' : 'Try changing the filters'}</p>
+          </div>
+        `;
+        document.getElementById('stats').textContent = '';
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(item => {
+        const person = PEOPLE.find(p => p.id === item.assignee);
+        const assigneeName = person ? person.name : '—';
+        const dotClass = person ? `dot-${person.id}` : 'dot-unassigned';
+        html += `
+          <div class="item ${item.done ? 'done' : ''}">
+            <input type="checkbox" class="item-checkbox" ${item.done ? 'checked' : ''}
+                   onchange="toggleDone(${item.id})">
+            <div class="item-body">
+              <div class="item-name">${escapeHtml(item.name)}</div>
+              <div class="item-meta">
+                <select class="assign-select" onchange="assignPerson(${item.id}, this.value)">
+                  <option value="">— Assign to</option>
+                  ${PEOPLE.map(p => `
+                    <option value="${p.id}" ${item.assignee === p.id ? 'selected' : ''}>
+                      ${p.name}
+                    </option>
+                  `).join('')}
+                </select>
+                <input type="text" class="item-comment" placeholder="Add a comment..."
+                       value="${escapeHtml(item.comment || '')}"
+                       onchange="setComment(${item.id}, this.value)">
+              </div>
+            </div>
+            <button class="item-delete" onclick="deleteItem(${item.id})" title="Delete">✕</button>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+
+      // Stats
+      const donePct = allCount > 0 ? Math.round(doneCount / allCount * 100) : 0;
+      document.getElementById('stats').textContent =
+        `${allCount} item${allCount !== 1 ? 's' : ''} · ${activeCount} active · ${doneCount} done (${donePct}%)`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    // ── Actions ─────────────────────────────────────────────────────────
+    function addItem() {
+      const input = document.getElementById('itemInput');
+      const name = input.value.trim();
+      if (!name) return;
+      items.push({ id: nextId++, name, assignee: '', comment: '', done: false });
+      input.value = '';
+      input.focus();
+      saveData();
+      render();
+    }
+
+    function toggleDone(id) {
+      const item = items.find(i => i.id === id);
+      if (item) {
+        item.done = !item.done;
+        saveData();
+        render();
+      }
+    }
+
+    function assignPerson(id, personId) {
+      const item = items.find(i => i.id === id);
+      if (item) {
+        item.assignee = personId;
+        saveData();
+        render();
+      }
+    }
+
+    function setComment(id, text) {
+      const item = items.find(i => i.id === id);
+      if (item) {
+        item.comment = text.trim();
+        saveData();
+      }
+    }
+
+    function deleteItem(id) {
+      if (!confirm('Delete this item?')) return;
+      items = items.filter(i => i.id !== id);
+      saveData();
+      render();
+    }
+
+    function clearDone() {
+      const hadDone = items.some(i => i.done);
+      if (!hadDone) return;
+      if (!confirm('Delete all completed items?')) return;
+      items = items.filter(i => !i.done);
+      saveData();
+      render();
+    }
+
+    // ── Export / Import ──────────────────────────────────────────────────
+    function exportData() {
+      const blob = new Blob([JSON.stringify({ items, nextId, exported: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `shared-list-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data.items || !Array.isArray(data.items)) {
+            throw new Error('Invalid format');
+          }
+          // Merge: keep unique items by id, append new ones
+          const existingIds = new Set(items.map(i => i.id));
+          let added = 0;
+          data.items.forEach(incoming => {
+            if (!existingIds.has(incoming.id)) {
+              items.push(incoming);
+              existingIds.add(incoming.id);
+              added++;
+            }
+          });
+          // Update nextId
+          const maxExisting = items.reduce((m, i) => Math.max(m, i.id || 0), 0);
+          if (data.nextId > maxExisting) nextId = data.nextId;
+          nextId = Math.max(nextId, maxExisting + 1);
+          saveData();
+          render();
+          if (added > 0) alert(`✅ Imported ${added} new item(s)`);
+          else alert('ℹ️ No new items to import (all already exist)');
+        } catch (err) {
+          alert('❌ Invalid file format');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // ── Event listeners ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      render();
+
+      // Person filter chips
+      document.querySelectorAll('.person-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.person-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          filterPerson = chip.dataset.filter;
+          render();
+        });
+      });
+
+      // Status filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          filterStatus = btn.dataset.status;
+          render();
+        });
+      });
+
+      // Enter key shortcut
+      document.getElementById('itemInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') addItem();
+      });
+    });
+  </script>
+</body>
+</html>
