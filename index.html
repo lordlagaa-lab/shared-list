@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Group List — Shared Tasks</title>
+  <title>Lista de Campismo — Partilhada</title>
   <style>
     :root {
       --bg: #0f0f13;
@@ -18,6 +18,7 @@
       --orange: #fb923c;
       --blue: #60a5fa;
       --purple: #a78bfa;
+      --teal: #2dd4bf;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -36,7 +37,7 @@
     }
     header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
     header h1 {
       font-size: 28px;
@@ -48,19 +49,19 @@
     header p {
       color: var(--text2);
       font-size: 14px;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .people-bar {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
     }
     .person-chip {
-      padding: 8px 18px;
+      padding: 7px 16px;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -68,7 +69,7 @@
       transition: all 0.2s;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
     .person-chip.active {
       border-color: var(--accent);
@@ -77,7 +78,7 @@
     .person-chip .count {
       font-size: 11px;
       background: var(--surface2);
-      padding: 2px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
       color: var(--text2);
     }
@@ -89,17 +90,17 @@
 
     .add-bar {
       display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
+      gap: 8px;
+      margin-bottom: 20px;
     }
     .add-bar input {
       flex: 1;
-      padding: 12px 16px;
+      padding: 11px 16px;
       border-radius: 12px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      font-size: 15px;
+      font-size: 14px;
       outline: none;
       transition: border 0.2s;
     }
@@ -109,12 +110,25 @@
     .add-bar input::placeholder {
       color: var(--text2);
     }
+    .add-category-select {
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+    .add-category-select:focus {
+      border-color: var(--accent);
+    }
     .btn {
-      padding: 12px 20px;
+      padding: 11px 18px;
       border: none;
       border-radius: 12px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
@@ -128,27 +142,19 @@
       transform: translateY(-1px);
     }
     .btn-sm {
-      padding: 6px 12px;
-      font-size: 12px;
+      padding: 5px 11px;
+      font-size: 11px;
       border-radius: 8px;
-    }
-    .btn-danger {
-      background: transparent;
-      color: var(--red);
-      border: 1px solid var(--red);
-    }
-    .btn-danger:hover {
-      background: rgba(248, 113, 113, 0.1);
     }
 
     .filter-bar {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
     .filter-btn {
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 8px;
       font-size: 12px;
       background: var(--surface);
@@ -169,35 +175,59 @@
     .filter-btn .f-count {
       font-size: 10px;
       opacity: 0.7;
-      margin-left: 4px;
+      margin-left: 3px;
+    }
+
+    /* Category header */
+    .category-header {
+      padding: 20px 4px 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .category-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .category-header:first-child {
+      padding-top: 0;
     }
 
     .item-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
     }
     .item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 14px 16px;
+      gap: 10px;
+      padding: 12px 16px;
       background: var(--surface);
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      transition: all 0.2s;
+      transition: all 0.15s;
+      margin-bottom: 4px;
     }
     .item:hover {
       border-color: #3a3a5a;
     }
     .item.done {
-      opacity: 0.5;
+      opacity: 0.45;
+    }
+    .item.done .item-name {
       text-decoration: line-through;
     }
     .item-checkbox {
       margin-top: 3px;
-      width: 18px;
-      height: 18px;
+      width: 17px;
+      height: 17px;
       accent-color: var(--accent);
       cursor: pointer;
       flex-shrink: 0;
@@ -207,24 +237,24 @@
       min-width: 0;
     }
     .item-name {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       word-break: break-word;
     }
     .item-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 6px;
       flex-wrap: wrap;
     }
     .assign-select {
-      padding: 4px 10px;
+      padding: 4px 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface2);
       color: var(--text);
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
       outline: none;
     }
@@ -233,13 +263,13 @@
     }
     .item-comment {
       flex: 1;
-      min-width: 120px;
-      padding: 5px 10px;
+      min-width: 100px;
+      padding: 4px 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface2);
       color: var(--text2);
-      font-size: 12px;
+      font-size: 11px;
       outline: none;
       transition: all 0.2s;
     }
@@ -255,8 +285,8 @@
       border: none;
       color: var(--text2);
       cursor: pointer;
-      font-size: 18px;
-      padding: 4px;
+      font-size: 16px;
+      padding: 3px;
       line-height: 1;
       border-radius: 6px;
       transition: all 0.2s;
@@ -282,7 +312,7 @@
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-top: 28px;
+      margin-top: 24px;
       flex-wrap: wrap;
     }
     .btn-ghost {
@@ -297,16 +327,15 @@
 
     .stats {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 16px;
       font-size: 12px;
       color: var(--text2);
     }
 
     @media (max-width: 600px) {
-      .item-meta {
-        flex-direction: column;
-        align-items: stretch;
-      }
+      .add-bar { flex-wrap: wrap; }
+      .add-category-select { flex: 1; }
+      .item-meta { flex-direction: column; align-items: stretch; }
       .item-comment { min-width: 0; }
     }
   </style>
@@ -314,13 +343,13 @@
 <body>
   <div class="container">
     <header>
-      <h1>📋 Shared List</h1>
-      <p>Add items, assign to someone, add a comment</p>
+      <h1>🏕️ Campismo — Lista Partilhada</h1>
+      <p>Cada um leva o seu · André · Pedro · Fifi · Davids</p>
     </header>
 
     <div class="people-bar" id="peopleBar">
       <span class="person-chip active" data-filter="all">
-        All <span class="count" id="countAll">0</span>
+        Todos <span class="count" id="countAll">0</span>
       </span>
       <span class="person-chip" data-filter="andre">
         <span class="dot-andre">●</span> André <span class="count" id="countAndre">0</span>
@@ -335,32 +364,43 @@
         <span class="dot-davids">●</span> Davids <span class="count" id="countDavids">0</span>
       </span>
       <span class="person-chip" data-filter="unassigned">
-        <span class="dot-unassigned">○</span> Unassigned <span class="count" id="countUnassigned">0</span>
+        <span class="dot-unassigned">○</span> Por atribuir <span class="count" id="countUnassigned">0</span>
       </span>
     </div>
 
     <div class="add-bar">
-      <input type="text" id="itemInput" placeholder="Add an item..." autofocus>
+      <input type="text" id="itemInput" placeholder="Adicionar item..." autofocus>
+      <select class="add-category-select" id="addCategory">
+        <option value="">Sem categoria</option>
+        <option value="Abrigo e Conforto">Abrigo e Conforto</option>
+        <option value="Zona Comum">Zona Comum</option>
+        <option value="Energia">Energia</option>
+        <option value="Cozinha e Alimentação">Cozinha e Alimentação</option>
+        <option value="Limpeza">Limpeza</option>
+        <option value="Segurança e Saúde">Segurança e Saúde</option>
+        <option value="Extras Úteis">Extras Úteis</option>
+      </select>
       <button class="btn btn-primary" onclick="addItem()">+ Add</button>
     </div>
 
     <div class="filter-bar">
-      <button class="filter-btn active" data-status="all">All <span class="f-count" id="fAll">0</span></button>
-      <button class="filter-btn" data-status="active">Active <span class="f-count" id="fActive">0</span></button>
-      <button class="filter-btn" data-status="done">Done <span class="f-count" id="fDone">0</span></button>
+      <button class="filter-btn active" data-status="all">Tudo <span class="f-count" id="fAll">0</span></button>
+      <button class="filter-btn" data-status="active">Por levar <span class="f-count" id="fActive">0</span></button>
+      <button class="filter-btn" data-status="done">Já tem dono <span class="f-count" id="fDone">0</span></button>
     </div>
 
     <div class="item-list" id="itemList">
       <div class="empty-state" id="emptyState">
-        <h3>✨ No items yet</h3>
-        <p>Add something above to get started</p>
+        <h3>✨ Lista vazia</h3>
+        <p>Adiciona itens acima para começar</p>
       </div>
     </div>
 
     <div class="action-bar">
-      <button class="btn btn-ghost" onclick="clearDone()">🗑 Clear Done</button>
-      <button class="btn btn-ghost" onclick="exportData()">📤 Export</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📥 Import</button>
+      <button class="btn btn-ghost" onclick="resetList()">🔄 Repor lista original</button>
+      <button class="btn btn-ghost" onclick="clearDone()">🗑 Limpar concluídos</button>
+      <button class="btn btn-ghost" onclick="exportData()">📤 Exportar</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📥 Importar</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     </div>
 
@@ -376,13 +416,69 @@
       { id: 'davids', name: 'Davids', emoji: '🟠' },
     ];
 
+    const CATEGORIES = [
+      'Abrigo e Conforto',
+      'Zona Comum',
+      'Energia',
+      'Cozinha e Alimentação',
+      'Limpeza',
+      'Segurança e Saúde',
+      'Extras Úteis',
+    ];
+
+    const DEFAULT_ITEMS = [
+      // ── Abrigo e Conforto ──
+      { name: 'Tendas',                         category: 'Abrigo e Conforto' },
+      { name: 'Lona para colocar debaixo das tendas', category: 'Abrigo e Conforto' },
+      { name: 'Toldo / sombrinha para a área comum',  category: 'Abrigo e Conforto' },
+      { name: 'Martelo para estacas',           category: 'Abrigo e Conforto' },
+      { name: 'Estacas e cordas extra',         category: 'Abrigo e Conforto' },
+      { name: 'Fita americana (duct tape)',     category: 'Abrigo e Conforto' },
+      // ── Zona Comum ──
+      { name: 'Mesa dobrável',                  category: 'Zona Comum' },
+      { name: 'Cadeiras dobráveis',             category: 'Zona Comum' },
+      { name: 'Tapete ou manta para convívio',  category: 'Zona Comum' },
+      { name: 'Iluminação LED para o acampamento', category: 'Zona Comum' },
+      // ── Energia ──
+      { name: 'Powerbank de grande capacidade',  category: 'Energia' },
+      // ── Cozinha e Alimentação ──
+      { name: 'Geleira',                        category: 'Cozinha e Alimentação' },
+      { name: 'Acumuladores de frio / gelo',    category: 'Cozinha e Alimentação' },
+      { name: 'Abre-garrafas e saca-rolhas',    category: 'Cozinha e Alimentação' },
+      { name: 'Faca de cozinha',                category: 'Cozinha e Alimentação' },
+      { name: 'Tábua de corte',                 category: 'Cozinha e Alimentação' },
+      { name: 'Copos reutilizáveis',            category: 'Cozinha e Alimentação' },
+      { name: 'Pratos e talheres reutilizáveis', category: 'Cozinha e Alimentação' },
+      { name: 'Papel de cozinha',               category: 'Cozinha e Alimentação' },
+      { name: 'Detergente da loiça',            category: 'Cozinha e Alimentação' },
+      { name: 'Esponja',                        category: 'Cozinha e Alimentação' },
+      // ── Limpeza ──
+      { name: 'Sacos do lixo',                  category: 'Limpeza' },
+      { name: 'Toalhetes húmidos',              category: 'Limpeza' },
+      { name: 'Álcool gel',                     category: 'Limpeza' },
+      { name: 'Papel higiénico de reserva',     category: 'Limpeza' },
+      // ── Segurança e Saúde ──
+      { name: 'Kit de primeiros socorros',      category: 'Segurança e Saúde' },
+      { name: 'Pensos rápidos',                 category: 'Segurança e Saúde' },
+      { name: 'Desinfetante',                   category: 'Segurança e Saúde' },
+      { name: 'Analgésicos básicos',            category: 'Segurança e Saúde' },
+      { name: 'Repelente de insetos',           category: 'Segurança e Saúde' },
+      { name: 'Protetor solar',                 category: 'Segurança e Saúde' },
+      // ── Extras Úteis ──
+      { name: 'Baralho de cartas / jogos',      category: 'Extras Úteis' },
+      { name: 'Coluna Bluetooth',               category: 'Extras Úteis' },
+      { name: 'Lanterna potente',               category: 'Extras Úteis' },
+      { name: 'Bidão de água',                  category: 'Extras Úteis' },
+      { name: 'Corda para estender toalhas ou roupa', category: 'Extras Úteis' },
+    ];
+
     let items = [];
     let filterPerson = 'all';
     let filterStatus = 'all';
     let nextId = 1;
 
     // ── Persistence ──────────────────────────────────────────────────────
-    const STORAGE_KEY = 'shared-list-data';
+    const STORAGE_KEY = 'shared-list-data-camping';
 
     function loadData() {
       try {
@@ -391,11 +487,29 @@
           const data = JSON.parse(raw);
           items = data.items || [];
           nextId = data.nextId || 1;
+          // If items exist but are empty, seed with defaults
+          if (items.length === 0) {
+            seedDefaults();
+          }
+        } else {
+          seedDefaults();
         }
       } catch (e) {
-        items = [];
-        nextId = 1;
+        seedDefaults();
       }
+    }
+
+    function seedDefaults() {
+      items = DEFAULT_ITEMS.map((d, i) => ({
+        id: i + 1,
+        name: d.name,
+        category: d.category,
+        assignee: '',
+        comment: '',
+        done: false,
+      }));
+      nextId = items.length + 1;
+      saveData();
     }
 
     function saveData() {
@@ -405,13 +519,11 @@
     // ── Render ──────────────────────────────────────────────────────────
     function getFilteredItems() {
       return items.filter(item => {
-        // Person filter
         if (filterPerson !== 'all' && filterPerson === 'unassigned') {
           if (item.assignee) return false;
         } else if (filterPerson !== 'all') {
           if (item.assignee !== filterPerson) return false;
         }
-        // Status filter
         if (filterStatus === 'active' && item.done) return false;
         if (filterStatus === 'done' && !item.done) return false;
         return true;
@@ -422,7 +534,7 @@
       const list = document.getElementById('itemList');
       const filtered = getFilteredItems();
 
-      // Update person counts (based on ALL items, not filtered)
+      // Counts
       const allCount = items.length;
       const countByPerson = {};
       let unassignedCount = 0;
@@ -435,12 +547,12 @@
       });
       document.getElementById('countAll').textContent = allCount;
       PEOPLE.forEach(p => {
-        const el = document.getElementById('count' + p.id.charAt(0).toUpperCase() + p.id.slice(1));
+        const key = 'count' + p.id.charAt(0).toUpperCase() + p.id.slice(1);
+        const el = document.getElementById(key);
         if (el) el.textContent = countByPerson[p.id] || 0;
       });
       document.getElementById('countUnassigned').textContent = unassignedCount;
 
-      // Status counts
       const activeCount = items.filter(i => !i.done).length;
       const doneCount = items.filter(i => i.done).length;
       document.getElementById('fAll').textContent = allCount;
@@ -450,49 +562,64 @@
       if (filtered.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <h3>${allCount === 0 ? '✨ No items yet' : '📭 Nothing matches'}</h3>
-            <p>${allCount === 0 ? 'Add something above' : 'Try changing the filters'}</p>
+            <h3>${allCount === 0 ? '✨ Lista vazia' : '📭 Nada corresponde'}</h3>
+            <p>${allCount === 0 ? 'Adiciona itens acima' : 'Tenta outros filtros'}</p>
           </div>
         `;
         document.getElementById('stats').textContent = '';
         return;
       }
 
-      let html = '';
+      // Group by category for display
+      const grouped = {};
+      const catOrder = [];
       filtered.forEach(item => {
-        const person = PEOPLE.find(p => p.id === item.assignee);
-        const assigneeName = person ? person.name : '—';
-        const dotClass = person ? `dot-${person.id}` : 'dot-unassigned';
-        html += `
-          <div class="item ${item.done ? 'done' : ''}">
-            <input type="checkbox" class="item-checkbox" ${item.done ? 'checked' : ''}
-                   onchange="toggleDone(${item.id})">
-            <div class="item-body">
-              <div class="item-name">${escapeHtml(item.name)}</div>
-              <div class="item-meta">
-                <select class="assign-select" onchange="assignPerson(${item.id}, this.value)">
-                  <option value="">— Assign to</option>
-                  ${PEOPLE.map(p => `
-                    <option value="${p.id}" ${item.assignee === p.id ? 'selected' : ''}>
-                      ${p.name}
-                    </option>
-                  `).join('')}
-                </select>
-                <input type="text" class="item-comment" placeholder="Add a comment..."
-                       value="${escapeHtml(item.comment || '')}"
-                       onchange="setComment(${item.id}, this.value)">
+        const cat = item.category || '';
+        if (!grouped[cat]) {
+          grouped[cat] = [];
+          catOrder.push(cat);
+        }
+        grouped[cat].push(item);
+      });
+
+      let html = '';
+      catOrder.forEach(cat => {
+        if (cat) {
+          html += `<div class="category-header">${escapeHtml(cat)}</div>`;
+        }
+        grouped[cat].forEach(item => {
+          const person = PEOPLE.find(p => p.id === item.assignee);
+          const dotClass = person ? `dot-${person.id}` : 'dot-unassigned';
+          html += `
+            <div class="item ${item.done ? 'done' : ''}">
+              <input type="checkbox" class="item-checkbox" ${item.done ? 'checked' : ''}
+                     onchange="toggleDone(${item.id})">
+              <div class="item-body">
+                <div class="item-name">${escapeHtml(item.name)}</div>
+                <div class="item-meta">
+                  <select class="assign-select" onchange="assignPerson(${item.id}, this.value)">
+                    <option value="">— Quem leva</option>
+                    ${PEOPLE.map(p => `
+                      <option value="${p.id}" ${item.assignee === p.id ? 'selected' : ''}>
+                        ${p.name}
+                      </option>
+                    `).join('')}
+                  </select>
+                  <input type="text" class="item-comment" placeholder="Nota..."
+                         value="${escapeHtml(item.comment || '')}"
+                         onchange="setComment(${item.id}, this.value)">
+                </div>
               </div>
+              <button class="item-delete" onclick="deleteItem(${item.id})" title="Remover">✕</button>
             </div>
-            <button class="item-delete" onclick="deleteItem(${item.id})" title="Delete">✕</button>
-          </div>
-        `;
+          `;
+        });
       });
       list.innerHTML = html;
 
-      // Stats
       const donePct = allCount > 0 ? Math.round(doneCount / allCount * 100) : 0;
       document.getElementById('stats').textContent =
-        `${allCount} item${allCount !== 1 ? 's' : ''} · ${activeCount} active · ${doneCount} done (${donePct}%)`;
+        `${allCount} item${allCount !== 1 ? 's' : ''} · ${activeCount} por levar · ${doneCount} com dono (${donePct}%)`;
     }
 
     function escapeHtml(text) {
@@ -506,7 +633,8 @@
       const input = document.getElementById('itemInput');
       const name = input.value.trim();
       if (!name) return;
-      items.push({ id: nextId++, name, assignee: '', comment: '', done: false });
+      const cat = document.getElementById('addCategory').value;
+      items.push({ id: nextId++, name, category: cat, assignee: '', comment: '', done: false });
       input.value = '';
       input.focus();
       saveData();
@@ -526,6 +654,7 @@
       const item = items.find(i => i.id === id);
       if (item) {
         item.assignee = personId;
+        item.done = personId ? true : false;
         saveData();
         render();
       }
@@ -540,18 +669,25 @@
     }
 
     function deleteItem(id) {
-      if (!confirm('Delete this item?')) return;
+      if (!confirm('Remover este item?')) return;
       items = items.filter(i => i.id !== id);
       saveData();
       render();
     }
 
     function clearDone() {
-      const hadDone = items.some(i => i.done);
-      if (!hadDone) return;
-      if (!confirm('Delete all completed items?')) return;
+      const hasDone = items.some(i => i.done);
+      if (!hasDone) return;
+      if (!confirm('Limpar todos os itens com dono?')) return;
       items = items.filter(i => !i.done);
       saveData();
+      render();
+    }
+
+    function resetList() {
+      if (!confirm('Repor a lista original? Isto vai apagar as atribuições atuais.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      seedDefaults();
       render();
     }
 
@@ -561,7 +697,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `shared-list-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `campismo-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -573,10 +709,7 @@
       reader.onload = function(e) {
         try {
           const data = JSON.parse(e.target.result);
-          if (!data.items || !Array.isArray(data.items)) {
-            throw new Error('Invalid format');
-          }
-          // Merge: keep unique items by id, append new ones
+          if (!data.items || !Array.isArray(data.items)) throw new Error('Invalid format');
           const existingIds = new Set(items.map(i => i.id));
           let added = 0;
           data.items.forEach(incoming => {
@@ -586,16 +719,14 @@
               added++;
             }
           });
-          // Update nextId
           const maxExisting = items.reduce((m, i) => Math.max(m, i.id || 0), 0);
           if (data.nextId > maxExisting) nextId = data.nextId;
           nextId = Math.max(nextId, maxExisting + 1);
           saveData();
           render();
-          if (added > 0) alert(`✅ Imported ${added} new item(s)`);
-          else alert('ℹ️ No new items to import (all already exist)');
+          alert(added > 0 ? `✅ Importados ${added} novo(s) item(ns)` : 'ℹ️ Nenhum item novo para importar');
         } catch (err) {
-          alert('❌ Invalid file format');
+          alert('❌ Ficheiro inválido');
         }
       };
       reader.readAsText(file);
@@ -607,7 +738,6 @@
       loadData();
       render();
 
-      // Person filter chips
       document.querySelectorAll('.person-chip').forEach(chip => {
         chip.addEventListener('click', () => {
           document.querySelectorAll('.person-chip').forEach(c => c.classList.remove('active'));
@@ -617,7 +747,6 @@
         });
       });
 
-      // Status filter buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -627,7 +756,6 @@
         });
       });
 
-      // Enter key shortcut
       document.getElementById('itemInput').addEventListener('keydown', (e) => {
         if (e.key === 'Enter') addItem();
       });
