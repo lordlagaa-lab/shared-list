@@ -225,14 +225,6 @@
       border-color: var(--tan);
       background: var(--surface2);
     }
-    .table-row.done {
-      opacity: 0.5;
-    }
-    .table-row.done .item-label {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
     .item-label {
       font-size: 13px;
       font-weight: 500;
@@ -616,8 +608,7 @@
         if (!g.length) return;
         if (cat) html += `<div class="category-header">${esc(cat)}</div>`;
         g.forEach(it => {
-          const assigned = it.ticks.andre || it.ticks.pedro || it.ticks.fifi || it.ticks.davids;
-          html += `<div class="table-row${assigned ? ' done' : ''}" data-id="${it.id}">
+          html += `<div class="table-row" data-id="${it.id}">
             <span class="col-item item-label">${esc(it.name)}</span>
             ${PEOPLE.map(p => `
               <span class="col-tick tick-cell">
