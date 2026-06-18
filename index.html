@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Being Gathering — Lista Partilhada</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;700&family=Rubik+Spray+Paint&display=swap" rel="stylesheet">
   <style>
     :root {
       --sand:       #e4dac4;
@@ -50,6 +50,27 @@
       text-align: center;
       padding: 40px 0 28px;
       position: relative;
+    }
+    .header-logo {
+      max-width: 380px;
+      width: 100%;
+      height: auto;
+      margin-bottom: 8px;
+    }
+    .spray-text {
+      font-family: 'Rubik Spray Paint', 'Caveat', cursive;
+      font-size: 32px;
+      color: #cc2222;
+      text-shadow:
+        2px 2px 0 rgba(200,30,30,0.15),
+        -1px -1px 0 rgba(200,30,30,0.08),
+        0 0 8px rgba(200,30,30,0.1);
+      letter-spacing: 6px;
+      margin-top: -8px;
+      margin-bottom: 4px;
+      transform: rotate(-1deg);
+      opacity: 0.92;
+      display: block;
     }
     header::after {
       content: '';
@@ -371,6 +392,8 @@
   <div class="top-stripe"></div>
   <div class="container">
     <header>
+      <img src="being-logo.jpg" alt="Being Gathering" class="header-logo">
+      <span class="spray-text">Da Ganancia</span>
       <div class="festival-badge">1–5 July 2026 · Boomland</div>
       <h1>Being <span class="ampersand">&amp;</span> Gathering<br>Lista Partilhada</h1>
       <p>Cada um leva o seu · André · Pedro · Fifi · Davids</p>
