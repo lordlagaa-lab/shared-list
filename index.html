@@ -3,174 +3,254 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Campismo — Partilhada</title>
+  <title>Being Gathering — Lista Partilhada</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f0f13;
-      --surface: #1a1a24;
-      --surface2: #24243a;
-      --border: #2e2e48;
-      --text: #e8e8f0;
-      --text2: #9999b0;
-      --accent: #7c6ef0;
-      --green: #4ade80;
-      --red: #f87171;
-      --orange: #fb923c;
-      --blue: #60a5fa;
-      --purple: #a78bfa;
-      --teal: #2dd4bf;
+      --sand:       #e4dac4;
+      --sand-light: #f0e8d6;
+      --sand-dark:  #c9bb9e;
+      --forest:     #383c1d;
+      --pine:       #2a514c;
+      --earth:      #442d18;
+      --bark:       #5a3d22;
+      --gold:       #ffec9e;
+      --gold-dim:   #e6d48a;
+      --cream:      #fffdf5;
+      --tan:        #e4b992;
+      --burgundy:   #4d2626;
+      --text:       #2c2418;
+      --text-muted: #7a6e5a;
+      --border:     #d4c8b0;
+      --surface:    rgba(255,253,245,0.65);
+      --surface2:   rgba(255,253,245,0.9);
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      background: var(--bg);
+      background: var(--sand);
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(228,185,146,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(56,60,29,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(228,218,196,0.3) 0%, transparent 50%);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px;
+      padding: 0;
     }
-    .container {
-      max-width: 800px;
+
+    /* ── Decorative top stripe ── */
+    .top-stripe {
       width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--forest), var(--pine), var(--earth), var(--burgundy), var(--forest));
     }
+
+    .container {
+      max-width: 820px;
+      width: 100%;
+      padding: 0 20px;
+    }
+
+    /* ── Header ── */
     header {
       text-align: center;
-      margin-bottom: 28px;
+      padding: 48px 0 36px;
+      position: relative;
     }
+
+    header::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--forest), var(--gold));
+      margin: 24px auto 0;
+      border-radius: 2px;
+    }
+
+    .festival-badge {
+      display: inline-block;
+      border: 1px solid var(--forest);
+      color: var(--forest);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
     header h1 {
-      font-size: 28px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 38px;
       font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--earth);
+      line-height: 1.15;
+      letter-spacing: -0.3px;
     }
+
+    header h1 .ampersand {
+      font-style: italic;
+      font-weight: 400;
+      color: var(--pine);
+    }
+
     header p {
-      color: var(--text2);
+      color: var(--text-muted);
       font-size: 14px;
-      margin-top: 4px;
+      margin-top: 8px;
+      font-weight: 400;
+      letter-spacing: 0.3px;
     }
+
+    /* ── People Bar ── */
     .people-bar {
       display: flex;
       gap: 6px;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       flex-wrap: wrap;
     }
     .person-chip {
-      padding: 7px 16px;
-      border-radius: 20px;
+      padding: 7px 18px;
+      border-radius: 24px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       background: var(--surface);
       border: 1px solid var(--border);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
       display: flex;
       align-items: center;
       gap: 5px;
+      color: var(--text-muted);
+      backdrop-filter: blur(6px);
+    }
+    .person-chip:hover {
+      border-color: var(--pine);
+      color: var(--text);
+      background: var(--surface2);
     }
     .person-chip.active {
-      border-color: var(--accent);
-      background: var(--surface2);
+      border-color: var(--pine);
+      background: var(--pine);
+      color: var(--cream);
     }
     .person-chip .count {
       font-size: 11px;
-      background: var(--surface2);
+      background: rgba(0,0,0,0.06);
       padding: 1px 7px;
       border-radius: 10px;
-      color: var(--text2);
+      color: inherit;
+    }
+    .person-chip.active .count {
+      background: rgba(255,255,255,0.15);
     }
     .dot-andre { color: #4ade80; }
     .dot-pedro { color: #60a5fa; }
     .dot-fifi { color: #f87171; }
     .dot-davids { color: #fb923c; }
-    .dot-unassigned { color: var(--text2); }
+    .dot-unassigned { color: var(--text-muted); }
 
+    /* ── Add Bar ── */
     .add-bar {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     .add-bar input {
       flex: 1;
-      padding: 11px 16px;
-      border-radius: 12px;
+      padding: 12px 18px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: var(--surface);
+      background: var(--surface2);
       color: var(--text);
       font-size: 14px;
+      font-family: 'Inter', sans-serif;
       outline: none;
-      transition: border 0.2s;
+      transition: border 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(6px);
     }
     .add-bar input:focus {
-      border-color: var(--accent);
+      border-color: var(--pine);
+      box-shadow: 0 0 0 3px rgba(42,81,76,0.1);
     }
     .add-bar input::placeholder {
-      color: var(--text2);
+      color: var(--text-muted);
+      font-style: italic;
     }
     .add-category-select {
-      padding: 11px 12px;
-      border-radius: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text2);
+      background: var(--surface2);
+      color: var(--text-muted);
       font-size: 12px;
+      font-family: 'Inter', sans-serif;
       outline: none;
       cursor: pointer;
+      backdrop-filter: blur(6px);
     }
     .add-category-select:focus {
-      border-color: var(--accent);
+      border-color: var(--pine);
     }
     .btn {
-      padding: 11px 18px;
+      padding: 12px 22px;
       border: none;
-      border-radius: 12px;
-      font-weight: 600;
+      border-radius: 14px;
+      font-weight: 500;
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
       white-space: nowrap;
+      font-family: 'Inter', sans-serif;
     }
     .btn-primary {
-      background: var(--accent);
-      color: white;
+      background: var(--pine);
+      color: var(--cream);
     }
     .btn-primary:hover {
-      opacity: 0.9;
+      background: var(--forest);
       transform: translateY(-1px);
-    }
-    .btn-sm {
-      padding: 5px 11px;
-      font-size: 11px;
-      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(42,81,76,0.25);
     }
 
+    /* ── Filter Bar ── */
     .filter-bar {
       display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 6px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
     .filter-btn {
-      padding: 5px 12px;
-      border-radius: 8px;
+      padding: 6px 14px;
+      border-radius: 10px;
       font-size: 12px;
+      font-weight: 500;
       background: var(--surface);
       border: 1px solid var(--border);
-      color: var(--text2);
+      color: var(--text-muted);
       cursor: pointer;
       transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      backdrop-filter: blur(6px);
     }
     .filter-btn:hover {
-      border-color: var(--accent);
+      border-color: var(--pine);
       color: var(--text);
     }
     .filter-btn.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
+      background: var(--pine);
+      color: var(--cream);
+      border-color: var(--pine);
     }
     .filter-btn .f-count {
       font-size: 10px;
@@ -178,28 +258,30 @@
       margin-left: 3px;
     }
 
-    /* Category header */
+    /* ── Category Header ── */
     .category-header {
-      padding: 20px 4px 8px;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text2);
+      padding: 24px 4px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--pine);
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 2px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
+      font-family: 'Inter', sans-serif;
     }
     .category-header::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--border);
+      background: linear-gradient(90deg, var(--border), transparent);
     }
     .category-header:first-child {
       padding-top: 0;
     }
 
+    /* ── Items ── */
     .item-list {
       display: flex;
       flex-direction: column;
@@ -207,149 +289,195 @@
     .item {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      padding: 12px 16px;
+      gap: 12px;
+      padding: 14px 18px;
       background: var(--surface);
-      border-radius: 10px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      transition: all 0.15s;
-      margin-bottom: 4px;
+      transition: all 0.2s ease;
+      margin-bottom: 5px;
+      backdrop-filter: blur(6px);
     }
     .item:hover {
-      border-color: #3a3a5a;
+      border-color: var(--tan);
+      background: var(--surface2);
     }
     .item.done {
-      opacity: 0.45;
+      opacity: 0.55;
     }
     .item.done .item-name {
       text-decoration: line-through;
+      color: var(--text-muted);
     }
     .item-checkbox {
-      margin-top: 3px;
-      width: 17px;
-      height: 17px;
-      accent-color: var(--accent);
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--pine);
       cursor: pointer;
       flex-shrink: 0;
+      border-radius: 4px;
     }
     .item-body {
       flex: 1;
       min-width: 0;
     }
     .item-name {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
       word-break: break-word;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
     }
     .item-meta {
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-top: 6px;
+      margin-top: 7px;
       flex-wrap: wrap;
     }
     .assign-select {
-      padding: 4px 8px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      background: var(--surface2);
+      background: var(--cream);
       color: var(--text);
-      font-size: 11px;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
       cursor: pointer;
       outline: none;
     }
     .assign-select:focus {
-      border-color: var(--accent);
+      border-color: var(--pine);
     }
     .item-comment {
       flex: 1;
       min-width: 100px;
-      padding: 4px 8px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 11px;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
       outline: none;
       transition: all 0.2s;
     }
     .item-comment:focus {
-      border-color: var(--accent);
-      color: var(--text);
+      border-color: var(--pine);
+      box-shadow: 0 0 0 2px rgba(42,81,76,0.08);
     }
     .item-comment::placeholder {
-      color: #555;
+      color: #b0a898;
+      font-style: italic;
     }
     .item-delete {
       background: none;
       border: none;
-      color: var(--text2);
+      color: var(--text-muted);
       cursor: pointer;
       font-size: 16px;
       padding: 3px;
       line-height: 1;
-      border-radius: 6px;
+      border-radius: 8px;
       transition: all 0.2s;
       flex-shrink: 0;
+      opacity: 0.5;
     }
     .item-delete:hover {
-      color: var(--red);
-      background: rgba(248, 113, 113, 0.1);
+      color: var(--burgundy);
+      background: rgba(77,38,38,0.08);
+      opacity: 1;
     }
 
+    /* ── Empty State ── */
     .empty-state {
       text-align: center;
-      padding: 48px 24px;
-      color: var(--text2);
+      padding: 60px 24px;
+      color: var(--text-muted);
     }
     .empty-state h3 {
-      font-size: 18px;
+      font-size: 20px;
       margin-bottom: 8px;
       color: var(--text);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 400;
     }
 
+    /* ── Action Bar ── */
     .action-bar {
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-top: 24px;
+      margin-top: 28px;
       flex-wrap: wrap;
     }
     .btn-ghost {
-      background: transparent;
-      color: var(--text2);
+      background: var(--surface2);
+      color: var(--text-muted);
       border: 1px solid var(--border);
+      backdrop-filter: blur(6px);
+      font-size: 12px;
+      padding: 10px 18px;
+      border-radius: 12px;
     }
     .btn-ghost:hover {
-      border-color: var(--accent);
-      color: var(--text);
+      border-color: var(--pine);
+      color: var(--pine);
     }
 
     .stats {
       text-align: center;
+      margin: 20px 0 48px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 24px 20px 32px;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      border-top: 1px solid var(--border);
       margin-top: 16px;
-      font-size: 12px;
-      color: var(--text2);
+    }
+    footer .logo-text {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--earth);
+    }
+    footer .logo-text .ampersand {
+      color: var(--pine);
     }
 
     @media (max-width: 600px) {
+      header h1 { font-size: 28px; }
       .add-bar { flex-wrap: wrap; }
       .add-category-select { flex: 1; }
       .item-meta { flex-direction: column; align-items: stretch; }
       .item-comment { min-width: 0; }
+      .container { padding: 0 14px; }
     }
   </style>
 </head>
 <body>
+  <div class="top-stripe"></div>
   <div class="container">
     <header>
-      <h1>🏕️ Campismo — Lista Partilhada</h1>
-      <p>Cada um leva o seu · André · Pedro · Fifi · Davids</p>
+      <div class="festival-badge">1–5 July 2026 · Boomland</div>
+      <h1>Being <span class="ampersand">&amp;</span> Gathering<br>Lista Partilhada</h1>
+      <p>André · Pedro · Fifi · Davids — cada um leva o seu</p>
     </header>
 
     <div class="people-bar" id="peopleBar">
       <span class="person-chip active" data-filter="all">
-        Todos <span class="count" id="countAll">0</span>
+        Todas <span class="count" id="countAll">0</span>
       </span>
       <span class="person-chip" data-filter="andre">
         <span class="dot-andre">●</span> André <span class="count" id="countAndre">0</span>
@@ -369,9 +497,9 @@
     </div>
 
     <div class="add-bar">
-      <input type="text" id="itemInput" placeholder="Adicionar item..." autofocus>
+      <input type="text" id="itemInput" placeholder="Adicionar item à lista..." autofocus>
       <select class="add-category-select" id="addCategory">
-        <option value="">Sem categoria</option>
+        <option value="">Categoria</option>
         <option value="Abrigo e Conforto">Abrigo e Conforto</option>
         <option value="Zona Comum">Zona Comum</option>
         <option value="Energia">Energia</option>
@@ -392,21 +520,26 @@
 
     <div class="item-list" id="itemList">
       <div class="empty-state" id="emptyState">
-        <h3>✨ Lista vazia</h3>
+        <h3>✨ Ainda não há nada</h3>
         <p>Adiciona itens acima para começar</p>
       </div>
     </div>
 
     <div class="action-bar">
-      <button class="btn btn-ghost" onclick="resetList()">🔄 Repor lista original</button>
-      <button class="btn btn-ghost" onclick="clearDone()">🗑 Limpar concluídos</button>
-      <button class="btn btn-ghost" onclick="exportData()">📤 Exportar</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📥 Importar</button>
+      <button class="btn btn-ghost" onclick="resetList()">⟳ Repor original</button>
+      <button class="btn btn-ghost" onclick="clearDone()">✓ Limpar concluídos</button>
+      <button class="btn btn-ghost" onclick="exportData()">↗ Exportar</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">↙ Importar</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     </div>
 
     <div class="stats" id="stats"></div>
   </div>
+
+  <footer>
+    <div class="logo-text">Being <span class="ampersand">&amp;</span> Gathering</div>
+    <div style="margin-top:4px;">1–5 July 2026 · Boomland · Idanha-a-Nova · Portugal</div>
+  </footer>
 
   <script>
     // ── Data ────────────────────────────────────────────────────────────
@@ -472,7 +605,7 @@
       { name: 'Lanterna potente',               category: 'Extras Úteis' },
       { name: 'Bidão de água',                  category: 'Extras Úteis' },
       { name: 'Corda para estender toalhas ou roupa', category: 'Extras Úteis' },
-      // ── Para Acrescentar (10 campos em branco) ──
+      // ── Para Acrescentar ──
       { name: '🔲 Extra  1', category: 'Para Acrescentar' },
       { name: '🔲 Extra  2', category: 'Para Acrescentar' },
       { name: '🔲 Extra  3', category: 'Para Acrescentar' },
@@ -490,8 +623,8 @@
     let filterStatus = 'all';
     let nextId = 1;
 
-    // ── Persistence ──────────────────────────────────────────────────────
-    const STORAGE_KEY = 'shared-list-data-camping';
+    // ── Persistence ──
+    const STORAGE_KEY = 'being-list-data';
 
     function loadData() {
       try {
@@ -500,10 +633,7 @@
           const data = JSON.parse(raw);
           items = data.items || [];
           nextId = data.nextId || 1;
-          // If items exist but are empty, seed with defaults
-          if (items.length === 0) {
-            seedDefaults();
-          }
+          if (items.length === 0) seedDefaults();
         } else {
           seedDefaults();
         }
@@ -529,7 +659,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ items, nextId }));
     }
 
-    // ── Render ──────────────────────────────────────────────────────────
+    // ── Render ──
     function getFilteredItems() {
       return items.filter(item => {
         if (filterPerson !== 'all' && filterPerson === 'unassigned') {
@@ -547,7 +677,6 @@
       const list = document.getElementById('itemList');
       const filtered = getFilteredItems();
 
-      // Counts
       const allCount = items.length;
       const countByPerson = {};
       let unassignedCount = 0;
@@ -575,7 +704,7 @@
       if (filtered.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <h3>${allCount === 0 ? '✨ Lista vazia' : '📭 Nada corresponde'}</h3>
+            <h3>${allCount === 0 ? '🌿 Ainda não há nada' : '📭 Nada corresponde'}</h3>
             <p>${allCount === 0 ? 'Adiciona itens acima' : 'Tenta outros filtros'}</p>
           </div>
         `;
@@ -583,7 +712,6 @@
         return;
       }
 
-      // Group by category for display
       const grouped = {};
       const catOrder = [];
       filtered.forEach(item => {
@@ -641,7 +769,7 @@
       return div.innerHTML;
     }
 
-    // ── Actions ─────────────────────────────────────────────────────────
+    // ── Actions ──
     function addItem() {
       const input = document.getElementById('itemInput');
       const name = input.value.trim();
@@ -698,19 +826,19 @@
     }
 
     function resetList() {
-      if (!confirm('Repor a lista original? Isto vai apagar as atribuições atuais.')) return;
+      if (!confirm('Repor a lista original?')) return;
       localStorage.removeItem(STORAGE_KEY);
       seedDefaults();
       render();
     }
 
-    // ── Export / Import ──────────────────────────────────────────────────
+    // ── Export / Import ──
     function exportData() {
       const blob = new Blob([JSON.stringify({ items, nextId, exported: new Date().toISOString() }, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `campismo-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `being-list-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -737,7 +865,7 @@
           nextId = Math.max(nextId, maxExisting + 1);
           saveData();
           render();
-          alert(added > 0 ? `✅ Importados ${added} novo(s) item(ns)` : 'ℹ️ Nenhum item novo para importar');
+          alert(added > 0 ? `✅ Importados ${added} novo(s) item(ns)` : 'ℹ️ Nenhum item novo');
         } catch (err) {
           alert('❌ Ficheiro inválido');
         }
@@ -746,7 +874,7 @@
       event.target.value = '';
     }
 
-    // ── Event listeners ──────────────────────────────────────────────────
+    // ── Events ──
     document.addEventListener('DOMContentLoaded', () => {
       loadData();
       render();
