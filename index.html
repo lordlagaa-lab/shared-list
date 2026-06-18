@@ -723,6 +723,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Bypass browser cache on first load
+      if (!window.location.search.includes('v=')) {
+        const v = 'v=' + Math.floor(Date.now() / 60000);
+        window.location.replace(window.location.pathname + '?' + v);
+        return;
+      }
       loadFromAPI();
       startPolling();
       document.getElementById('itemInput').addEventListener('keydown', e => {
